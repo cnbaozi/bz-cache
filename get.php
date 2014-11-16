@@ -5,11 +5,18 @@
  * Date: 2014/11/16
  * Time: 15:15
  */
-define('ROOT_DIR', dirname(__FILE__));
-$uri = $_SERVER['REQUEST_URI'];
+
+// site config start
 $dirs = array(
-    'test1' => 'http://baozy.com/'
+    'test1' => 'http://test.com/'
 );
+// site config end
+
+define('ROOT_DIR', dirname(__FILE__));
+$uri = strtok($_SERVER['REQUEST_URI'], '?');
+if (strpos($uri, '/get.php') === 0) {
+    die("access error.");
+}
 $uriInfo = explode('/', $uri);
 $dir = $uriInfo[1];
 if (!isset($dirs[$dir])) {
@@ -25,7 +32,12 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_HEADER, 0);
 $file = curl_exec($ch);
 $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+$httpCode = curl_getinfo($ch,CURLINFO_HTTP_CODE);
 curl_close($ch);
+
+if ($httpCode!=200) {
+    die("error: $httpCode");
+}
 
 $path = ROOT_DIR . $uri;
 $parentDir = dirname($path);

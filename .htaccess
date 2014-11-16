@@ -1,9 +1,21 @@
+# todo 不太正确
 Options -Indexes
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteRule ^index\.php$ - [L]
+
+
+RewriteCond %{QUERY_STRING} update$
+RewriteRule . - [E=CACHE_STATUE:UPDATE,L]
+
+RewriteCond %{QUERY_STRING} update$
+RewriteRule \/(.*) /get.php [L]
+
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule . - [E=CACHE_STATUE:HIT,L]
+
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d [OR]
-RewriteCond %{QUERY_STRING} update
-RewriteRule . /get.php [L]
+RewriteRule . /get.php [E=CACHE_STATUE:MISS,L] # todo 赋值失败
+
+Header set Bz-Cache "%{CACHE_STATUE}e"
 </IfModule>
