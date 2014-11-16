@@ -4,6 +4,8 @@ Options -Indexes
 RewriteEngine On
 RewriteRule ^index\.php$ - [L]
 
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule \/(.*) /get.php [E=CACHE_STATUE:MISS,L] # todo 赋值失败
 
 RewriteCond %{QUERY_STRING} update$
 RewriteRule . - [E=CACHE_STATUE:UPDATE,L]
@@ -14,8 +16,6 @@ RewriteRule \/(.*) /get.php [L]
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule . - [E=CACHE_STATUE:HIT,L]
 
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule . /get.php [E=CACHE_STATUE:MISS,L] # todo 赋值失败
 
 Header set Bz-Cache "%{CACHE_STATUE}e"
 </IfModule>
