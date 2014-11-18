@@ -12,11 +12,21 @@ $dirs = array(
 );
 // site config end
 
+// 也是为了安全考虑
+$noCacheType = array('php', 'php5', 'php4');
+$cache = true;
+
 define('ROOT_DIR', dirname(__FILE__));
 $uri = strtok($_SERVER['REQUEST_URI'], '?');
+
+if (strpos($uri, '..') !== false) {
+    die('path cannot include ".."');
+}
 if (strpos($uri, '/get.php') === 0) {
     die("access error.");
 }
+
+// white list
 $uriInfo = explode('/', $uri);
 $dir = $uriInfo[1];
 if (!isset($dirs[$dir])) {
@@ -36,15 +46,21 @@ $httpCode = curl_getinfo($ch,CURLINFO_HTTP_CODE);
 curl_close($ch);
 
 if ($httpCode!=200) {
-    die("error: $httpCode");
+    die("http error: $httpCode");
+}
+// file type block list
+$_uriArr = explode('.', $uri);
+if (in_array(array_pop($_uriArr), $noCacheType)) {
+    $cache = false;
+}
+if ($cache) {
+    $path = ROOT_DIR . $uri;
+    $parentDir = dirname($path);
+    if (!is_dir($parentDir)) {
+        mkdir($parentDir, 0777, true);
+    }
+    file_put_contents($path, $file);
 }
 
-$path = ROOT_DIR . $uri;
-$parentDir = dirname($path);
-if (!is_dir($parentDir)) {
-    mkdir($parentDir, 0777, true);
-}
-file_put_contents($path, $file);
 header('Content-Type: '.$contentType);
-
 echo $file;
